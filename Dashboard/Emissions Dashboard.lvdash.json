@@ -1,0 +1,385 @@
+{
+  "datasets": [
+    {
+      "name": "d98d330a",
+      "displayName": "Global Carbon Emission Locations Dataset",
+      "queryLines": [
+        "select\n",
+        "latitude,\n",
+        "longitude,\n",
+        "`GHG emissions mtons CO2e` as Emissions\n",
+        "from emissions.default.emissions_data"
+      ],
+      "catalog": "workspace",
+      "schema": "default"
+    },
+    {
+      "name": "dbe41e9d",
+      "displayName": "Emissions per person",
+      "queryLines": [
+        "select\n",
+        "    county_state_name,\n",
+        "    population,\n",
+        "    CAST(\n",
+        "      REPLACE(`GHG emissions mtons CO2e`, ',', '') \n",
+        "      AS DOUBLE\n",
+        "      ) / nullif(\n",
+        "        CAST(\n",
+        "          REPLACE(`Population`, ',', '') \n",
+        "          AS DOUBLE\n",
+        "        ), 0\n",
+        "      ) as Emissions_per_person\n",
+        "from emissions.default.emissions_data\n",
+        "ORDER BY emissions_per_person DESC"
+      ],
+      "catalog": "emissions",
+      "schema": "default"
+    },
+    {
+      "name": "4652157a",
+      "displayName": "Total Emissions per State",
+      "queryLines": [
+        "select\n",
+        "    state_abbr,\n",
+        "    SUM(CAST(\n",
+        "      REPLACE(`GHG emissions mtons CO2e`, ',', '') \n",
+        "      AS DOUBLE\n",
+        "      )) as Total_Emissions\n",
+        "from emissions.default.emissions_data\n",
+        "group by state_abbr\n",
+        "ORDER BY Total_Emissions DESC\n",
+        "limit 10 "
+      ]
+    },
+    {
+      "name": "c1b1cb45",
+      "displayName": "County Shaming",
+      "queryLines": [
+        "select\n",
+        "    county_state_name,\n",
+        "    population,\n",
+        "    CAST(\n",
+        "      REPLACE(`GHG emissions mtons CO2e`, ',', '') \n",
+        "      AS DOUBLE\n",
+        "      ) as Total_Emissions\n",
+        "from emissions_data\n",
+        "ORDER BY Total_Emissions DESC\n",
+        "limit 10 "
+      ],
+      "catalog": "emissions",
+      "schema": "default"
+    }
+  ],
+  "pages": [
+    {
+      "name": "8305d277",
+      "displayName": "E-Dashboard",
+      "layout": [
+        {
+          "widget": {
+            "name": "emission-per-location",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "d98d330a",
+                  "fields": [
+                    {
+                      "name": "latitude",
+                      "expression": "`latitude`"
+                    },
+                    {
+                      "name": "longitude",
+                      "expression": "`longitude`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 1
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ],
+                "size": -1.9,
+                "opacity": 1
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Emissions for Continental US"
+              },
+              "widgetType": "symbol-map",
+              "encodings": {
+                "coordinates": {
+                  "latitude": {
+                    "fieldName": "latitude"
+                  },
+                  "longitude": {
+                    "fieldName": "longitude"
+                  }
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "2ede2d8f",
+            "multilineTextboxSpec": {
+              "lines": [
+                "<span style=\"text-align:center;display:block\"><span style=\"font-size: 36px;font-family: Georgia;line-height: 1.5;\">**United States Emissions Breakdown&#32;**</span></span>\n",
+                "\n",
+                "<span style=\"text-align:center;display:block\">This data was collected by the EPA (Environmental Protection Agency) in 2023 </span>"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "emissions-vs-population",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dbe41e9d",
+                  "fields": [
+                    {
+                      "name": "county_state_name",
+                      "expression": "`county_state_name`"
+                    },
+                    {
+                      "name": "Emissions_per_person",
+                      "expression": "`Emissions_per_person`"
+                    },
+                    {
+                      "name": "population",
+                      "expression": "`population`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Emissions vs Population",
+                "showDescription": true,
+                "description": "Higher populations tend to have lower emissions per person"
+              },
+              "mark": {
+                "size": -1.4
+              },
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "Emissions_per_person",
+                  "displayName": "Emissions Per Person",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "population",
+                  "displayName": "Population",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "county_state_name"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 2,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "9d800f91",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4652157a",
+                  "fields": [
+                    {
+                      "name": "sum(Total_Emissions)",
+                      "expression": "SUM(`Total_Emissions`)"
+                    },
+                    {
+                      "name": "state_abbr",
+                      "expression": "`state_abbr`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showDescription": true,
+                "description": "The Top 10 States account for 51% of all Emissions in the US."
+              },
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(Total_Emissions)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Emission Percentage"
+                },
+                "color": {
+                  "fieldName": "state_abbr",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "total-emission-by-mton-of-co2e",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c1b1cb45",
+                  "fields": [
+                    {
+                      "name": "sum(Total_Emissions)",
+                      "expression": "SUM(`Total_Emissions`)"
+                    },
+                    {
+                      "name": "county_state_name",
+                      "expression": "`county_state_name`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "frame": {
+                "showTitle": true,
+                "title": "Total Emission by mTon of CO2e"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(Total_Emissions)",
+                  "displayName": "Total Emissions ",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "county_state_name",
+                  "displayName": "County State Name",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
